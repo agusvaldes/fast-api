@@ -13,7 +13,7 @@ app = FastAPI(title='Proyecto individual nro 1: Recomendacion de peliculas',
 # Función para que el la API tome el dataframe
 @app.get('/')
 async def read_root():
-    return {'Bienvenidos a la API de recomedación de peliculas. Dirígite a /docs'}
+    return {'¡Saludos! Estás en la API de recomendación de películas. Para obtener información adicional, visita la ruta /docs'}
     
 @app.on_event('startup')
 async def startup():
