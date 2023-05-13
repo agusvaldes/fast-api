@@ -1,18 +1,5 @@
-absl-py==1.3.0
-anyio==3.6.2
-asgiref==3.5.2
-astunparse==1.6.3
-cachetools==5.2.0
-certifi==2022.12.7
-charset-normalizer==2.1.1
-click==8.1.3
-colorama==0.4.6
-contourpy==1.0.7
-cycler==0.11.0
-distlib==0.3.6
-Django==4.1.4
-et-xmlfile==1.1.0
 fastapi==0.95.1
+<<<<<<< HEAD
 filelock==3.9.0
 flatbuffers==22.12.6
 fonttools==4.38.0
@@ -76,3 +63,10 @@ virtualenv-clone==0.5.7
 Werkzeug==2.2.2
 wrapt==1.14.1
 nltk==3.8.1
+=======
+numpy==1.21.4
+pandas==1.3.5
+uvicorn==0.22.0
+sklearn
+nltk
+>>>>>>> 6f446ddb793a01653ede1276353d258697b7652f
