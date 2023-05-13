@@ -6,6 +6,7 @@ import pandas as pd
 from fastapi import FastAPI
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
+import h5py
 
 
 # Indicamos título y descripción de la API
@@ -199,12 +200,16 @@ def retorno(pelicula):
 def recomendacion(title):
     '''Ingresas un nombre de pelicula y te recomienda las similares en una lista
     ''' 
-    # Verificamos que el titulo ingresado se encuentre en el df
+   # Verificamos que el titulo ingresado se encuentre en el df
     if title not in df_highly_rated['title'].values:
         return 'La pelicula no se encuentra en el conjunto de la base de datos.'
     else:
         # Si el titulo estan en el df, encontramos su indice
         index = indices[title]
+
+        # Cargamos la matriz de similitud del coseno desde el archivo hdf5
+        with h5py.File('cosine_sim.h5', 'r') as f:
+            cosine_sim = f['cosine_sim'][:]
 
         # Obtenemos las puntuaciones de similitud de todas las peliculas con la pelicula dada
         similarity = list(enumerate(cosine_sim[index]))
