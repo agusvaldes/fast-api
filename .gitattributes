@@ -1,3 +1,5 @@
 *.csv filter=lfs diff=lfs merge=lfs -text
 *csv filter=lfs diff=lfs merge=lfs -text
 movies_final_with_combined_features.csv filter=lfs diff=lfs merge=lfs -text
+*h5 filter=lfs diff=lfs merge=lfs -text
+*hdf5 filter=lfs diff=lfs merge=lfs -text
