@@ -205,7 +205,6 @@ def recomendacion(title):
     else:
         # Si el titulo estan en el df, encontramos su indice
         index = indices[title]
-        # Esto nos da una manera de acceder a la fila correspondiente en la matriz de similitud del coseno.
 
         # Obtenemos las puntuaciones de similitud de todas las peliculas con la pelicula dada
         similarity = list(enumerate(cosine_sim[index]))
