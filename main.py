@@ -28,7 +28,7 @@ async def load_data():
 
     # Load the data
     df = pd.read_csv('movies_final.csv')
-    df_highly_rated = pd.read_csv('movies_final_with_combined_features.csv')
+    df_highly_rated = pd.read_csv('movies_final_with_combined_features2.csv')
 
 
 
