@@ -1,37 +1,52 @@
 # Importamos las librerías
+
 import pandas as pd 
 import numpy as np
+import pandas as pd
 from fastapi import FastAPI
+from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.metrics.pairwise import cosine_similarity
+
 
 # Indicamos título y descripción de la API
 app = FastAPI(title='Proyecto individual nro 1: Recomendacion de peliculas',
             description='API de datos y recomendaciones de películas')
 
+# Global variables
+df_highly_rated = None
+cv = None
+count_matrix = None
+cosine_sim = None
+indices = None
+
 #http://127.0.0.1:8000/
 
 
-# Función para que el la API tome el dataframe
+@app.on_event("startup")
+async def load_data():
+    global df, df_highly_rated, cv, count_matrix, cosine_sim, indices
+
+    # Load the data
+    df = pd.read_csv('movies_final.csv')
+    df_highly_rated = pd.read_csv('movies_final_with_combined_features.csv')
+
+
+
+    # Compute count_matrix, cosine_sim and indices here
+    cv = CountVectorizer(stop_words='english', max_features=5000)
+    count_matrix = cv.fit_transform(df_highly_rated['combined_features'])
+    cosine_sim = cosine_similarity(count_matrix)
+    indices = pd.Series(df_highly_rated.index, index=df_highly_rated['title']).drop_duplicates()
+
 @app.get('/')
 async def read_root():
     return {'Bienvenidos a la API de recomedación de peliculas. Dirígite a /docs'}
-    
-@app.on_event('startup')
-async def startup():
-    global df
-    df = pd.read_csv('movies_final.csv') 
-
-# Función para reconocer el servidor local
-
-@app.get('/')
-async def index():
-    return {'Te encuentras en la API de recomedación de peliculas, dirigite a /docs'}
 
 @app.get('/about/')
 async def about():
     return {'Proyecto individual Nº1: Recomendacion de peliculas'}
 
-
-# Función de películas por mes
+# Función de películas por me
 
 @app.get('/peliculas_mes/({mes})')
 def peliculas_mes(mes:str):
@@ -98,6 +113,8 @@ def peliculas_dia(dia:str):
 
 @app.get('/franquicia/({franquicia})')
 def franquicia(franquicia):
+    '''Se ingresa la franquicia, retornando la cantidad de peliculas de esa franquicia, la ganancia total y el promedio
+    ''' 
     # Convertimos la entrada del usuario a minúsculas
     franquicia = franquicia.lower()
 
@@ -123,7 +140,7 @@ def franquicia(franquicia):
 @app.get('/peliculas_pais/({pais})')
 def peliculas_pais(pais:str):
     '''
-    Ingresas el pais, retornando la cantidad de peliculas producidas en el mismo
+    Ingresas el pais, retornando la cantidad de peliculas producidas en dicho país
     '''
     
     # Filtramos el dataframe y contamos filas
@@ -158,6 +175,8 @@ def productoras(productora:str):
 
 @app.get('/retorno/({pelicula})')
 def retorno(pelicula):
+    '''Ingresas la pelicula, retornando la inversion, la ganancia, el retorno y el año en el que se lanzó
+    ''' 
     # Convertimos la entrada del usuario a minúsculas
     pelicula = pelicula.lower()
 
@@ -171,5 +190,35 @@ def retorno(pelicula):
     retorno_pelicula = str(info_pelicula['return'].iloc[0])
     year_pelicula = str(info_pelicula['release_year'].iloc[0])
 
-    return {'pelicula': pelicula_nombre, 'inversion': inversion_pelicula, 'ganancia': ganancia_pelicula, 'retorno': retorno_pelicula, 'año': year_pelicula}
-# ,,,,,,,,SAD,ASD
+    return {'pelicula': pelicula_nombre, 'inversion': inversion_pelicula, 'ganancia': ganancia_pelicula, 'retorno de inversion': retorno_pelicula, 'año': year_pelicula}
+
+
+
+
+@app.get('/recomendacion/{title}')
+def recomendacion(title):
+    '''Ingresas un nombre de pelicula y te recomienda las similares en una lista
+    ''' 
+    # Verificamos que el titulo ingresado se encuentre en el df
+    if title not in df_highly_rated['title'].values:
+        return 'La pelicula no se encuentra en el conjunto de la base de datos.'
+    else:
+        # Si el titulo estan en el df, encontramos su indice
+        index = indices[title]
+        # Esto nos da una manera de acceder a la fila correspondiente en la matriz de similitud del coseno.
+
+        # Obtenemos las puntuaciones de similitud de todas las peliculas con la pelicula dada
+        similarity = list(enumerate(cosine_sim[index]))
+
+        # Ordenamos las peliculas en funcion de las puntuaciones de similitud
+        similarity = sorted(similarity, key=lambda x: x[1], reverse=True)
+
+        # Obtenemos 5 peliculas mas similares
+        similarity = similarity[1:6]
+
+        # Obtiene los indices de las peliculas
+        movie_indices = [i[0] for i in similarity]
+
+        # Devuelve las 5 peliculas mas similares
+        return df_highly_rated['title'].iloc[movie_indices].tolist()
+
