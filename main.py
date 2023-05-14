@@ -2,12 +2,10 @@
 
 import pandas as pd 
 import numpy as np
-import pandas as pd
 from fastapi import FastAPI
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
-import h5py
-
+from sklearn.neighbors import NearestNeighbors
 
 # Indicamos título y descripción de la API
 app = FastAPI(title='Proyecto individual nro 1: Recomendacion de peliculas',
@@ -25,19 +23,23 @@ indices = None
 
 @app.on_event("startup")
 async def load_data():
-    global df, df_highly_rated, cv, count_matrix, cosine_sim, indices
+    global df,df_highly_rated, cv, count_matrix, nn, indices
 
-    # Load the data
-    df = pd.read_csv('movies_final.csv')
+    # Carga los datos
     df_highly_rated = pd.read_csv('movies_final_with_combined_features2.csv')
+    df = pd.read_csv('movies_final.csv')
 
-
-
-    # Compute count_matrix, cosine_sim and indices here
+    # Computa la matriz de recuento
     cv = CountVectorizer(stop_words='english', max_features=5000)
     count_matrix = cv.fit_transform(df_highly_rated['combined_features'])
-    cosine_sim = cosine_similarity(count_matrix)
+
+    # Crea un modelo NearestNeighbors
+    nn = NearestNeighbors(metric='cosine', algorithm='brute')
+    nn.fit(count_matrix)
+
+    # Crea un índice de títulos de películas
     indices = pd.Series(df_highly_rated.index, index=df_highly_rated['title']).drop_duplicates()
+
 
 @app.get('/')
 async def read_root():
@@ -200,28 +202,18 @@ def retorno(pelicula):
 def recomendacion(title):
     '''Ingresas un nombre de pelicula y te recomienda las similares en una lista
     ''' 
-   # Verificamos que el titulo ingresado se encuentre en el df
+    # Verifica si el título ingresado se encuentra en el df
     if title not in df_highly_rated['title'].values:
         return 'La pelicula no se encuentra en el conjunto de la base de datos.'
     else:
-        # Si el titulo estan en el df, encontramos su indice
+        # Si el título está en el df, encuentra su índice
         index = indices[title]
 
-        # Cargamos la matriz de similitud del coseno desde el archivo hdf5
-        with h5py.File('cosine_sim.h5', 'r') as f:
-            cosine_sim = f['cosine_sim'][:]
+        # Obtiene las puntuaciones de similitud de las 5 películas más cercanas
+        distances, indices_knn = nn.kneighbors(count_matrix[index], n_neighbors=6)  # n_neighbors=6 because the first match will be the movie itself
 
-        # Obtenemos las puntuaciones de similitud de todas las peliculas con la pelicula dada
-        similarity = list(enumerate(cosine_sim[index]))
-
-        # Ordenamos las peliculas en funcion de las puntuaciones de similitud
-        similarity = sorted(similarity, key=lambda x: x[1], reverse=True)
-
-        # Obtenemos 5 peliculas mas similares
-        similarity = similarity[1:6]
-
-        # Obtiene los indices de las peliculas
-        movie_indices = [i[0] for i in similarity]
+        # Obtiene los índices de las películas
+        movie_indices = indices_knn[0][1:]  # Skip the first match (the movie itself)
 
         # Devuelve las 5 peliculas mas similares
         return df_highly_rated['title'].iloc[movie_indices].tolist()
