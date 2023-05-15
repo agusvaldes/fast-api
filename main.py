@@ -43,7 +43,7 @@ async def load_data():
 
 @app.get('/')
 async def read_root():
-    return {'Bienvenidos a la API de recomedación de peliculas. Dirígite a /docs'}
+    return {'Mi primera API. Dirígite a /docs'}
 
 @app.get('/about/')
 async def about():
@@ -170,7 +170,7 @@ def productoras(productora:str):
     cantidad_peliculas_prod = (lista_peliculas_productoras).shape[0]
     revenue_prod = lista_peliculas_productoras['revenue'].sum()
 
-    return {'productora': productora, 'ganancia_total': revenue_prod, 'cantidad': cantidad_peliculas_prod}
+    return {'productora': productora, 'ganancia total': revenue_prod, 'cantidad de peliculas': cantidad_peliculas_prod}
 
 
 # Función métricas por película
