@@ -145,7 +145,6 @@ def peliculas_pais(pais:str):
     '''
     Ingresas el pais, retornando la cantidad de peliculas producidas en dicho país
     '''
-    
     # Filtramos el dataframe y contamos filas
     movies_filtered = df[(df['country'].str.lower() == pais.lower())]
     movies_unique = movies_filtered.drop_duplicates(subset='id')    
