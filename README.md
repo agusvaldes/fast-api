@@ -1,6 +1,7 @@
 # Sistema de Recomendación de Películas
 
 Este proyecto es un sistema de recomendación de películas basado en la similitud de contenido. Toma la información de películas, para identificar películas similares a la que un usuario elige.
+Este proyecto lo dividí en dos notebooks, el primero consiste en la [Transformacion de los datos y las funciones](https://github.com/agusvaldes/fast-api/blob/main/proyecto1_recomendacion_peliculas.ipynb) y el segundo notebook en el [Análisis exploratorio de los datos y el Machine learning](https://github.com/agusvaldes/fast-api/blob/main/eda_y_ml.ipynb)
 
 ## Preprocesamiento de Datos
 
